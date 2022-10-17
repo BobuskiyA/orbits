@@ -1,6 +1,8 @@
 import { createOrbit } from './orbit.js';
 import { aqerp } from './util.js';
 
+import { orbitsPartialData, maxSpeed } from './config.js';
+
 function App() {
   const app = document.getElementById('app');
 
@@ -8,46 +10,87 @@ function App() {
     throw new TypeError(`Expected app to be HTMLElement. Got: ${typeof app}`);
   }
 
-  const planetOrbit = document.createElement('div');
-  planetOrbit.className = 'planet-orbit';
+  // Create containers for each orbit
+  const orbitsData = orbitsPartialData.map(orbit => {
+    const planetOrbit = document.createElement('div');
+    planetOrbit.className = 'planet-orbit';
+    app.appendChild(planetOrbit);
 
-  app.appendChild(planetOrbit);
+    return { ...orbit, renderToElement: planetOrbit };
+  })
 
-  const minAngle = 90;
-  const maxAngle = 190;
+  // create an orbits with interpolants
+  const orbits = orbitsData.map(orbit => {
+    const { data: { angleDegrees, maxAngle } } = orbit;
 
-  const moonData = {
-    // Starting angle
-    angleDegrees: minAngle,
-    title: '5 years',
-    subtitle: 'on the market'
-  }
-
-  const { changeAngle } = createOrbit({
-    width: 736,
-    height: 736,
-    gradientString: '65% 50% at 50% 50%, #6E40F2 0%, rgba(110, 64, 242, 0) 100%',
-    borderWidth: 2,
-    data: moonData,
-    renderToElement: planetOrbit
+    return {
+      orbitData: orbit,
+      handle: createOrbit(orbit),
+      interpolant: aqerp(angleDegrees, maxAngle, maxSpeed),
+    };
   });
 
-  const maxSpeed = 5;
-  
-  // Get the quadratic interpolant (linear speed)
-  const interp = aqerp(minAngle, maxAngle, maxSpeed);
+  const maxWidth = orbits.reduce((acc, { orbitData }) => {
+    const { width } = orbitData;
 
-  // Animate the moon by changing angle
-  const interval = setInterval(() => {
-    // Interpolate if not done
-    const { angle, done } = interp();
-
-    if (done) {
-      clearInterval(interval);
-      return;
+    if (width > acc) {
+      return width;
     }
 
-    changeAngle(angle);
+    return acc;
+  }, 0);
+
+  const maxHeight = orbits.reduce((acc, { orbitData }) => {
+    const { height } = orbitData;
+
+    if (height > acc) {
+      return height;
+    }
+
+    return acc;
+  }, 0);
+
+  orbits.forEach(({ orbitData }) => {
+    const { width, height, renderToElement } = orbitData;
+
+    if (maxWidth <= 0) {
+      throw new TypeError('Expected maxWidth to be positive');
+    }
+
+    if (maxHeight <= 0) {
+      throw new TypeError('Expected maxHeight to be positive');
+    }
+
+    const style = {
+      top: `${(maxWidth - width) / 2}px`,
+      left: `${(maxHeight - height) / 2}px`,
+    }
+
+    Object.assign(renderToElement.style, style);
+  });
+
+  // Animate all moons within single interval
+  const interval = setInterval(() => {
+    const finished = [];
+
+    orbits.forEach(orbit => {
+      const { interpolant: interp, handle: { changeAngle } } = orbit;
+
+      // Interpolate if not done
+      const { angle, done } = interp();
+
+      if (done) {
+        finished.push({ angle, done });
+        return;
+      }
+
+      changeAngle(angle);
+    });
+    
+    // When all done strategy
+    if (finished.every(({ done }) => done === true) && finished.length === orbits.length) {
+      clearInterval(interval);
+    }
   }, 100);
 }
 

@@ -79,7 +79,17 @@ export function createOrbit({
 
   const gradientTransform = `scale(${scaleX} ${scaleY}) translate(${(1 - scaleX) / 2} ${(1 - scaleY) / 2})`
 
-  const gradientId = 'orbit-gradient'
+  let gradientId = 'orbit-gradient';
+  let counter = 1;
+
+  if (document.getElementById(gradientId) !== null) {
+    while (document.getElementById(`${gradientId}-${counter}`) !== null) {
+      counter++;
+    }
+
+    gradientId = `${gradientId}-${counter}`;
+  }
+
   const radialGraident = document.createElementNS(ns, 'radialGradient');
   radialGraident.setAttribute('id', gradientId);
   radialGraident.setAttribute('cx', cx);
@@ -98,7 +108,17 @@ export function createOrbit({
     radialGraident.appendChild(stopEl);
   });
 
-  const maskId = 'orbit-mask';
+  let maskId = 'orbit-mask';
+  counter = 1;
+
+  if (document.getElementById(maskId) !== null) {
+    while (document.getElementById(`${maskId}-${counter}`) !== null) {
+      counter++;
+    }
+
+    maskId = `${maskId}-${counter}`;
+  }
+
   const mask = document.createElementNS(ns, 'mask');
   mask.setAttribute('x', '0');
   mask.setAttribute('y', '0');
@@ -192,25 +212,37 @@ export function createOrbit({
 
   const { offsetTop: top, offsetLeft: left } = renderToElement;
 
+  // Object.assign(moonContainer.style, {
+  //   left: `${moonPosition.x - moonRadius + left}px`,
+  //   top: `${moonPosition.y - containerHeight / 2 + top}px`,
+  // });
+
   Object.assign(moonContainer.style, {
-    left: `${moonPosition.x - moonRadius + left}px`,
-    top: `${moonPosition.y - containerHeight / 2 + top}px`,
+    left: `${moonPosition.x - moonRadius}px`,
+    top: `${moonPosition.y - containerHeight / 2}px`,
   });
 
   return {
     /**
      * Changes the position of moon on the orbit circle.
-     * @param {number} newAngleDegrees The new position on the orbit circle in degrees.
+     * @param {number} newAngleDegrees The new position on the orbit circle in degrees. Does nothing, if angle is the same.
      * @returns {void}
      */
     changeAngle(newAngleDegrees) {
-      const moonPosition = getPositionOnEllipse(width, height, newAngleDegrees);
-      const { offsetTop: top, offsetLeft: left } = renderToElement;
+      if (angleDegrees !== newAngleDegrees) {
+        const moonPosition = getPositionOnEllipse(width, height, newAngleDegrees);
+        const { offsetTop: top, offsetLeft: left } = renderToElement;
+  
+        // Object.assign(moonContainer.style, {
+        //   left: `${moonPosition.x - moonRadius + left}px`,
+        //   top: `${moonPosition.y - containerHeight / 2 + top}px`,
+        // });
 
-      Object.assign(moonContainer.style, {
-        left: `${moonPosition.x - moonRadius + left}px`,
-        top: `${moonPosition.y - containerHeight / 2 + top}px`,
-      });
+        Object.assign(moonContainer.style, {
+          left: `${moonPosition.x - moonRadius}px`,
+          top: `${moonPosition.y - containerHeight / 2}px`,
+        });
+      }
     }
   }
 }
