@@ -5,7 +5,8 @@ body {
 }
 
 .planet-orbit {
-  margin: 120px;
+  position: absolute;
+  margin: 2vh 25%;
 }
 
 .orbit-moon-container {
