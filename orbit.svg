@@ -1,0 +1,13 @@
+<svg width="1000" height="1000" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="orbit-gradient" gradientTransform="scale(1.14 1) translate(-0.07 0)">
+      <stop offset="0%" stop-color="#6E40F2" />
+      <stop offset="100%" stop-color="rgba(110, 64, 242, 0)" />
+    </radialGradient>
+    <mask id="orbit-mask" x="0" y="0" width="1000" height="1000">
+      <rect x="0" y="0" width="1000" height="1000" fill="#000" />
+      <circle r="500" cx="500" cy="500" stroke="#FFF" stroke-width="20" />
+    </mask>
+  </defs>
+  <circle mask="url(#orbit-mask)" r="500" cx="500" cy="500" fill="url(#orbit-gradient)" />
+</svg>
