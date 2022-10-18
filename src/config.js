@@ -39,5 +39,3 @@ export const orbitsPartialData = [{
     subtitle: 'users'
   },
 }];
-
-orbitsPartialData.reverse();
